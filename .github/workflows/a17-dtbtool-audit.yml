@@ -1,0 +1,20 @@
+name: AOSP17 PE dtbToolLineage historical QCDT source audit
+
+on:
+  push:
+    branches:
+      - audit/a17-mondrian-dtbtool-20261104
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qcdt-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate archived QCDT host-tool format and explicit non-integration
+        run: python3 tools/verify_a17_legacy_dtbtool.py
