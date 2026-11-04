@@ -1,0 +1,57 @@
+name: AOSP17 official libufdt DTB DTBO tools source integrity
+
+on:
+  push:
+    branches:
+      - audit/a17-mondrian-dtbtool-20261104
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-android17-libufdt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify official DTBO table tools and modern source format
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64,json
+          from urllib.request import Request,urlopen
+
+          base="https://android.googlesource.com/platform/system/libufdt/+/refs/tags/android-17.0.0_r1/"
+          def get(path,fmt):
+              with urlopen(Request(base+path+"?format="+fmt,
+                                   headers={"User-Agent":"PixelExperience-Reborn-A17-DTBO-audit"}),
+                           timeout=60) as f:
+                  return f.read()
+          def read(path):
+              return base64.b64decode(get(path,"TEXT")).decode("utf-8")
+
+          raw=get("","JSON").decode("utf-8")
+          assert raw.startswith(")]}'"), "tagged Gitiles JSON missing"
+          root=json.loads(raw.split("\n",1)[1])
+          assert root["id"]=="4647c80f1cdb7269980158b72ab2d7f8e5d4e33f",root.get("id")
+          dirs={x["name"] for x in root["entries"]}
+          for name in ("utils","include","sysdeps","tests","Android.bp"):
+              assert name in dirs,name
+
+          bp=read("utils/src/Android.bp")
+          readme=read("utils/README.md")
+          dt_table=read("utils/src/dt_table.h")
+          for item in ('name: "mkdtimg"', 'name: "mkdtboimg"',
+                       '"mkdtboimg.py"', '"mkdtimg.c"', '"mkdtimg_dump.c"',
+                       '"libfdt"', '"libufdt_sysdeps"'):
+              assert item in bp,item
+          assert "dt_table_header" in readme and "dt_table_entry" in readme
+          assert "d7b7ab1e" in readme, "official DTBO magic absent from reference"
+          assert "DT_TABLE_MAGIC" in dt_table or "DT_TABLE_MAGIC" in read("utils/src/dt_table_core.h")
+          assert "dtbToolLineage" not in bp
+          print("PASS: exact Android17 libufdt Git tree and separate modern DTB/DTBO host tools")
+          print("NOT TESTED: actual mkdtboimg execution, boot/recovery, AVB, DTBO hardware or mondrian")
+          PY
