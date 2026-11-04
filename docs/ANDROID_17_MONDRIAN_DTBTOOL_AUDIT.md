@@ -24,7 +24,8 @@ For independent PE-Reborn Android17 `device/xiaomi/mondrian` + `device/xiaomi/sm
 - [x] Exact old PE host-tool sources and QCDT magic/version identified.
 - [x] Verified no archived `dtbtool` manifest project is selected; official AOSP17 `system/libufdt` is selected.
 - [x] Official AOSP17 libufdt tag tree and `mkdtimg` / `mkdtboimg` Soong targets identified.
-- [x] Host-only source integrity workflows added (historic QCDT + official AOSP17 libufdt tags).
+- [x] Old PE QCDT source integrity [CI PASS #41797562289](https://github.com/PixelExperience-Reborn/system_tools_dtbtool/actions/runs/41797562289).
+- [x] Official AOSP17 `system/libufdt` exact Git tree and modern mkdtimg/mkdtboimg source identities [CI PASS #41797562433](https://github.com/PixelExperience-Reborn/system_tools_dtbtool/actions/runs/41797562433). These are source-only checks, not boot/dtbo image execution.
 - [ ] Compile and test official DTBO tools on synthetic DTB/DTBO fixtures with actual output headers; compare to board-specific known-good images.
 - [ ] Verify boot image header/DTBO/VBMeta on independent PE-Reborn mondrian product.
 - [ ] Android17 Soong image build, bootloader, recovery and physical hardware tests.
